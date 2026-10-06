@@ -111,7 +111,23 @@ client.disconnect()
 ## View Example
 ### Navigation Example
 This example is placed in a `NavigationStack` to demonstrate how the client automatically disconnects when the view Task is cancelled on dismiss
+```ruby
+# Rails
+
+# Action Cable message used in below example
+ActionCable.server.broadcast(
+    'clips_channel',
+    {
+        id: 123,
+        name: "Darth Vader",
+        active: true
+    }
+)
+```
+
 ```swift
+// Swift
+
 import SwiftUI
 import ActionSocket
 
