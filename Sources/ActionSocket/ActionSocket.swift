@@ -90,8 +90,9 @@ public actor ActionSocket {
             self.continuation = continuation
             
             continuation.onTermination = { [weak self] _ in
+                continuation.yield(.connection(false))
+                continuation.yield(.subscription(false))
                 Task { [weak self] in
-                    print("DISCONNECT")
                     await self?.disconnect()
                 }
             }
@@ -100,7 +101,7 @@ public actor ActionSocket {
     /// -------------------------------------------------------
     
     
-    public func connect() {
+    func connect() {
         if isConnected { return }
         
         var request = URLRequest(url: config.url)
