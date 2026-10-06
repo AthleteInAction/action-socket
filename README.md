@@ -82,9 +82,9 @@ client.connect()
 socketTask = Task {
     await event in await client.stream {
         switch event {
-        case .isConnected(let isConnected):
+        case .connection(let isConnected):
             isConnected = isConnected
-        case .isSubscribed(let isSubscribed):
+        case .subscription(let isSubscribed):
             isSubscribed = isSubscribed
         case .data(let data):
             // data is JSON data for easy decoding via Codable object
@@ -193,9 +193,9 @@ struct NavigationExampleView: View {
     func connect() async {
         for await event in await client.stream {
             switch event {
-            case .isConnected(let isConnected):
+            case .connection(let isConnected):
                 self.isConnected = isConnected
-            case .isSubscribed(let isSubscribed):
+            case .subscription(let isSubscribed):
                 self.isSubscribed = isSubscribed
             case .data(let data):
                 let user = decodeToUser(data: data)
