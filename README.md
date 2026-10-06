@@ -7,6 +7,9 @@ Thread-safe client, designed to work with Rails Action Cable websocket protocol.
 - iOS 18+
 - macOS 26+
 
+## Limitations
+- only works with one channel per instance for now
+
 Rails Action Cable must broadcast JSON data. It must not broadcast a single data type, such as an `Integer` or `String`:
 ```ruby
 # Rails
