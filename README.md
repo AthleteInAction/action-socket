@@ -154,7 +154,13 @@ struct User: Codable {
 
 
 struct NavigationExampleView: View {
-    let client = ActionSocket("ws://localhost:3000/cable", channel: "ExampleChannel")
+    let client = ActionSocket(
+        "ws://localhost:3000/cable",
+        channel: "ExampleChannel",
+        headers: [
+            ActionSocket.Header(field: "X-Device-ID", value: "ABC123)
+        ]
+    )
     
     
     @State var isConnected: Bool = false
@@ -164,24 +170,14 @@ struct NavigationExampleView: View {
     
     var body: some View {
         VStack(spacing: 20) {
+            if let user {
+                Text(user.name)
+            }
+            
             Text(isConnected ? "✅ CONNECTED" : "❌ DISCONNECTED")
             Text(isSubscribed ? "✅ SUBSCRIBED" : "❌ UNSUBSCRIBED")
-            
-            // if client is connected, client.connect()
-            // will do nothing
-            Button("MANUAL CONNECT"){
-                Task { await connect() }
-            }
-            .foregroundColor(.green)
-            
-            // on manual disconnect, client will not
-            // attempt to re-connect again until
-            // client.connect() is called
-            Button("DISCONNECT", role: .destructive){
-                Task { await client.disconnect() }
-            }
         }
-        // view task is cancelled on view dismiss
+        // view task is cancelled on view dismissal
         // this will automatically disconnect the
         // client and end the event stream
         .task {
