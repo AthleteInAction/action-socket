@@ -36,6 +36,7 @@ ActionCable.server.broadcast(
 
 ## Limitations
 - only works with one channel per instance for now
+- have only tested with ws and not wss
 
 ## Usage
 
@@ -56,7 +57,7 @@ let url = URL(string: "ws://localhost:3000/cable")!
 let client = ActionSocket(url, channel: "ExampleChannel")
 ```
 
-### with config and headers
+### with headers
 ```swift
 let url = URL(string: "ws://localhost:3000/cable")!
 
@@ -65,9 +66,7 @@ let headers: [ActionSocket.Header] = [
   ActionSocket.Header(field: "X-Device-ID", value: "ABC123")
 ]
 
-let config = ActionSocket.Config(url: url, channel: "ExampleChannel", headers: headers)
-
-let client = ActionSocket(config: config)
+let client = ActionSocket(url: url, channel: "ExampleChannel", headers: headers)
 ```
 
 ### Event Stream
@@ -102,6 +101,17 @@ socketTask?.cancel()
 // client.disconnect() is for manual control and will end the event stream and Task
 // client.connect() will need to be called if you wish to re-connect after client.disconnect()
 client.disconnect()
+```
+
+### Send Message
+```swift
+let payload: [String: Any?] = [
+    "id": 123,
+    "name": "Darth Vader",
+    "active": true
+]
+
+try? await client.send(payload)
 ```
 
 ## Re-Connection Strategy

@@ -12,14 +12,19 @@ import Foundation
 public actor ActionSocket {
     public struct Config {
         let url: URL
-        let headers: [Header] = []
         let channel: String
+        let headers: [Header]
     }
     
     
     public struct Header {
-        let field: String
-        let value: String
+        public let field: String
+        public let value: String
+        
+        public init(field: String, value: String) {
+            self.field = field
+            self.value = value
+        }
     }
     
     
@@ -42,13 +47,32 @@ public actor ActionSocket {
     
     
     public enum StreamEvent: Sendable {
-        case isConnected(Bool)
-        case isSubscribed(Bool)
+        case connection(Bool)
+        case subscription(Bool)
         case data(Data)
     }
     
     
     let config: Config
+    let identifier: [String: String]
+    
+    
+    init(config: Config){
+        self.config = config
+        self.identifier = ["channel": config.channel]
+    }
+    
+    
+    public init(_ urlString: String, channel: String, headers: [Header] = []){
+        let config = Config(url: URL(string: urlString)!, channel: channel, headers: headers)
+        self.init(config: config)
+    }
+    
+    
+    public init(_ url: URL, channel: String, headers: [Header] = []){
+        let config = Config(url: url, channel: channel, headers: headers)
+        self.init(config: config)
+    }
     
     
     var isConnected: Bool = false
@@ -67,29 +91,13 @@ public actor ActionSocket {
             
             continuation.onTermination = { [weak self] _ in
                 Task { [weak self] in
+                    print("DISCONNECT")
                     await self?.disconnect()
                 }
             }
         }
     }
     /// -------------------------------------------------------
-    
-    
-    public init(config: Config){
-        self.config = config
-    }
-    
-    
-    public init(_ urlString: String, channel: String){
-        let config = Config(url: URL(string: urlString)!, channel: channel)
-        self.init(config: config)
-    }
-    
-    
-    public init(_ url: URL, channel: String){
-        let config = Config(url: url, channel: channel)
-        self.init(config: config)
-    }
     
     
     public func connect() {
@@ -113,8 +121,8 @@ public actor ActionSocket {
     public func disconnect() {
         isConnected = false
         isSubscribed = false
-        continuation?.yield(.isConnected(false))
-        continuation?.yield(.isSubscribed(false))
+        continuation?.yield(.connection(false))
+        continuation?.yield(.subscription(false))
         permanentDisconnect = true
         webSocketTask?.cancel(with: .normalClosure, reason: nil)
         webSocketTask = nil
@@ -141,8 +149,8 @@ public actor ActionSocket {
         isConnected = false
         isSubscribed = false
         
-        continuation?.yield(.isConnected(false))
-        continuation?.yield(.isSubscribed(false))
+        continuation?.yield(.connection(false))
+        continuation?.yield(.subscription(false))
         
         if permanentDisconnect {
             reconnectAttempts = 0
@@ -183,7 +191,7 @@ public actor ActionSocket {
         
         /// only send connection update if changes from false to true
         if !isConnected {
-            continuation?.yield(.isConnected(true))
+            continuation?.yield(.connection(true))
         }
         isConnected = true
         
@@ -200,7 +208,7 @@ public actor ActionSocket {
             /// Received Rails Subscription Confirmation
             if subscription.type == .confirmed {
                 isSubscribed = true
-                continuation?.yield(.isSubscribed(true))
+                continuation?.yield(.subscription(true))
                 return
             }
         }
@@ -220,6 +228,23 @@ public actor ActionSocket {
         
         continuation?.yield(.data(messageData))
         // ========================================================================
+    }
+    
+    
+    public func send(_ data: [String: Any?]) async throws {
+        guard let task = webSocketTask, isConnected else { throw SocketError.webSocketDisconnected }
+        
+        let payload: [String: Any?] = [
+            "command": "message",
+            "identifier": identifier.actionSocketToJSON!,
+            "data": data.actionSocketToJSON!
+        ]
+        
+        if let payload = payload.actionSocketToJSON {
+            try await task.send(.string(payload))
+        } else {
+            throw SocketError.webSocketInvalidFormat
+        }
     }
 }
 
