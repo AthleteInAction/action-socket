@@ -66,7 +66,7 @@ let headers: [ActionSocket.Header] = [
   ActionSocket.Header(field: "X-Device-ID", value: "ABC123")
 ]
 
-let client = ActionSocket(url: url, channel: "ExampleChannel", headers: headers)
+let client = ActionSocket(url, channel: "ExampleChannel", headers: headers)
 ```
 
 ### Event Stream
