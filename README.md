@@ -158,7 +158,7 @@ struct NavigationExampleView: View {
         "ws://localhost:3000/cable",
         channel: "ExampleChannel",
         headers: [
-            ActionSocket.Header(field: "X-Device-ID", value: "ABC123)
+            ActionSocket.Header(field: "X-Device-ID", value: "ABC123")
         ]
     )
     
