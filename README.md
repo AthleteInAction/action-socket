@@ -84,17 +84,10 @@ socketTask = Task {
     await event in await client.stream {
         switch event {
         case .isConnected(let isConnected):
-            // use main thread to update UI items
-            Task { @MainActor in
-                self.isConnected = isConnected
-            }
+            isConnected = isConnected
         case .isSubscribed(let isSubscribed):
-            // use main thread to update UI items
-            Task { @MainActor in
-                self.isSubscribed = isSubscribed
-            }
+            isSubscribed = isSubscribed
         case .data(let data):
-            // use main thread to update UI items
             // data is JSON data for easy decoding via Codable object
         }
     }
