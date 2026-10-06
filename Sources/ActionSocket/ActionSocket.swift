@@ -67,7 +67,6 @@ public actor ActionSocket {
             
             continuation.onTermination = { [weak self] _ in
                 Task { [weak self] in
-                    print("TERMINATE")
                     await self?.disconnect()
                 }
             }
