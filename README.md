@@ -36,6 +36,7 @@ ActionCable.server.broadcast(
 
 ## Limitations
 - only works with one channel per instance for now
+- have only tested with ws and not wss
 
 ## Usage
 
@@ -56,7 +57,7 @@ let url = URL(string: "ws://localhost:3000/cable")!
 let client = ActionSocket(url, channel: "ExampleChannel")
 ```
 
-### with config and headers
+### with headers
 ```swift
 let url = URL(string: "ws://localhost:3000/cable")!
 
@@ -65,9 +66,7 @@ let headers: [ActionSocket.Header] = [
   ActionSocket.Header(field: "X-Device-ID", value: "ABC123")
 ]
 
-let config = ActionSocket.Config(url: url, channel: "ExampleChannel", headers: headers)
-
-let client = ActionSocket(config: config)
+let client = ActionSocket(url: url, channel: "ExampleChannel", headers: headers)
 ```
 
 ### Event Stream
@@ -83,9 +82,9 @@ client.connect()
 socketTask = Task {
     await event in await client.stream {
         switch event {
-        case .isConnected(let isConnected):
+        case .connection(let isConnected):
             isConnected = isConnected
-        case .isSubscribed(let isSubscribed):
+        case .subscription(let isSubscribed):
             isSubscribed = isSubscribed
         case .data(let data):
             // data is JSON data for easy decoding via Codable object
@@ -102,6 +101,17 @@ socketTask?.cancel()
 // client.disconnect() is for manual control and will end the event stream and Task
 // client.connect() will need to be called if you wish to re-connect after client.disconnect()
 client.disconnect()
+```
+
+### Send Message
+```swift
+let payload: [String: Any?] = [
+    "id": 123,
+    "name": "Darth Vader",
+    "active": true
+]
+
+try? await client.send(payload)
 ```
 
 ## Re-Connection Strategy
@@ -183,9 +193,9 @@ struct NavigationExampleView: View {
     func connect() async {
         for await event in await client.stream {
             switch event {
-            case .isConnected(let isConnected):
+            case .connection(let isConnected):
                 self.isConnected = isConnected
-            case .isSubscribed(let isSubscribed):
+            case .subscription(let isSubscribed):
                 self.isSubscribed = isSubscribed
             case .data(let data):
                 let user = decodeToUser(data: data)
