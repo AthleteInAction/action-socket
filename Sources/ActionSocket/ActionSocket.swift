@@ -61,13 +61,13 @@ public actor ActionSocket {
     /// STREAM ----------------------------------------------------------------------------------------
     var continuation: AsyncStream<StreamEvent>.Continuation?
     public var stream: AsyncStream<StreamEvent> {
-        AsyncStream { continuation in
+        connect()
+        return AsyncStream { continuation in
             self.continuation = continuation
             
             continuation.onTermination = { [weak self] _ in
-                continuation.yield(.isConnected(false))
-                continuation.yield(.isSubscribed(false))
                 Task { [weak self] in
+                    print("TERMINATE")
                     await self?.disconnect()
                 }
             }
@@ -94,6 +94,8 @@ public actor ActionSocket {
     
     
     public func connect() {
+        if isConnected { return }
+        
         var request = URLRequest(url: config.url)
         
         config.headers.forEach { request.addValue($0.value, forHTTPHeaderField: $0.field) }
@@ -109,9 +111,11 @@ public actor ActionSocket {
     }
     
     
-    func disconnect() {
+    public func disconnect() {
         isConnected = false
         isSubscribed = false
+        continuation?.yield(.isConnected(false))
+        continuation?.yield(.isSubscribed(false))
         permanentDisconnect = true
         webSocketTask?.cancel(with: .normalClosure, reason: nil)
         webSocketTask = nil
