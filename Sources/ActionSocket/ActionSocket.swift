@@ -81,8 +81,8 @@ public actor ActionSocket {
     }
     
     
-    public init(_ url: String, channel: String){
-        let config = Config(url: URL(string: url)!, channel: channel)
+    public init(_ urlString: String, channel: String){
+        let config = Config(url: URL(string: urlString)!, channel: channel)
         self.init(config: config)
     }
     

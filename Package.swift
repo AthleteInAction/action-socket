@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Action Socket",
+    name: "action-socket",
     platforms: [
         .iOS(.v18),
         .macOS(.v26)
