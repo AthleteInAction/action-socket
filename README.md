@@ -1,7 +1,7 @@
 # ActionSocket
 
 ## Overview
-Thread-safe client designed to work with Rails Action Cable websocket protocol. Uses Swift AsyncStream to deliver connection, subscription, and message events.
+Thread-safe client, designed to work with Rails Action Cable websocket protocol. Uses Swift AsyncStream to deliver connection, subscription, and message events.
 
 ## Requirements
 - iOS 18+
