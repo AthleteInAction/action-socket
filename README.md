@@ -104,6 +104,14 @@ socketTask?.cancel()
 client.disconnect()
 ```
 
+## Re-Connection Strategy
+If the client loses connection, it will automatically attempt to re-connect.
+- 1st attempt is immediate
+- 2nd attempt waits 1 second
+- 3rd attempt waits 2 seconds
+- 4th attempt waits 3 seconds
+- all subsequent attempts wait 3 seconds until re-connect
+
 ## View Example
 ### Navigation Example
 This example is placed in a `NavigationStack` to demonstrate how the client automatically disconnects when the view Task is cancelled on dismiss
