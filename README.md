@@ -82,11 +82,14 @@ client.connect()
 socketTask = Task {
     await event in await client.stream {
         switch event {
-        case .connection(let isConnected):
+        case .ping(let time): /// TimeInterval
+            // time is a UNIX timestamp from the Rails Action Cable Server
+            ()
+        case .connection(let isConnected): /// Bool
             isConnected = isConnected
-        case .subscription(let isSubscribed):
+        case .subscription(let isSubscribed): /// Bool
             isSubscribed = isSubscribed
-        case .data(let data):
+        case .data(let data): /// Data
             // data is JSON data for easy decoding via Codable object
         }
     }
@@ -189,6 +192,8 @@ struct NavigationExampleView: View {
     func connect() async {
         for await event in await client.stream {
             switch event {
+            case .ping(let time):
+                ()
             case .connection(let isConnected):
                 self.isConnected = isConnected
             case .subscription(let isSubscribed):
