@@ -84,6 +84,7 @@ socketTask = Task {
         switch event {
         case .ping(let time): /// TimeInterval
             // time is a UNIX timestamp from the Rails Action Cable Server
+            ()
         case .connection(let isConnected): /// Bool
             isConnected = isConnected
         case .subscription(let isSubscribed): /// Bool
