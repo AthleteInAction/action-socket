@@ -50,6 +50,22 @@ public actor ActionSocket {
         case connection(Bool)
         case subscription(Bool)
         case data(Data)
+        case ping(TimeInterval)
+    }
+    
+    
+    struct Ping: Codable, Sendable {
+        let type: Key
+        let at: TimeInterval
+        
+        enum Key: String, Codable {
+            case ping
+        }
+        
+        enum CodingKeys: String, CodingKey {
+            case type
+            case at = "message"
+        }
     }
     
     
@@ -212,6 +228,13 @@ public actor ActionSocket {
                 continuation?.yield(.subscription(true))
                 return
             }
+        }
+        // ========================================================================
+        
+        
+        // PING ===================================================================
+        if let ping: Ping = taskMessage.actionSocketDecode() {
+            continuation?.yield(.ping(ping.at))
         }
         // ========================================================================
         
