@@ -77,9 +77,9 @@ client.connect()
 
 @State var isConnected: Bool = false
 @State var isSubscribed: Bool = false
-@State var socketTask: Task<Void, Never>?
+@State var streamTask: Task<Void, Never>?
 
-socketTask = Task {
+streamTask = Task {
     await event in await client.stream {
         switch event {
         case .ping(let time): /// TimeInterval
@@ -98,7 +98,7 @@ socketTask = Task {
 // if the Task is cancelled, the client will automatically disconnect
 // the event stream will end
 // you will need to make a manual call to client.connect() to re-connect
-socketTask?.cancel()
+streamTask?.cancel()
 
 // if the parent task is cancelled, client.disconnect() is not needed
 // client.disconnect() is for manual control and will end the event stream and Task
@@ -184,12 +184,12 @@ struct NavigationExampleView: View {
         // this will automatically disconnect the
         // client and end the event stream
         .task {
-            await connect()
+            await stream()
         }
     }
     
     
-    func connect() async {
+    func stream() async {
         for await event in await client.stream {
             switch event {
             case .ping(let time):
