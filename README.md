@@ -19,7 +19,7 @@ params = {
 }
 
 ActionCable.server.broadcast(
-  'clips_channel',
+  'example_channel',
   params
 )
 # ----------------------------------------
@@ -28,7 +28,7 @@ ActionCable.server.broadcast(
 # !!! WILL NOT WORK !!!!!!!!!!!!!!!!!!!!!!
 user_id = 123
 ActionCable.server.broadcast(
-  'clips_channel',
+  'example_channel',
   user_id
 )
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -133,7 +133,7 @@ This example is placed in a `NavigationStack` to demonstrate how the client auto
 
 # Action Cable message used in below example
 ActionCable.server.broadcast(
-    'clips_channel',
+    'example_channel',
     {
         id: 123,
         name: "Darth Vader",
