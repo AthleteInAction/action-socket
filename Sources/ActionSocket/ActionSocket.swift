@@ -39,10 +39,11 @@ public actor ActionSocket {
     }
     
     
-    public enum SocketError: Error {
+    public enum Error: Swift.Error {
         case webSocketTaskUnavailable
         case webSocketDisconnected
         case webSocketInvalidFormat
+        case dataParse
     }
     
     
@@ -153,7 +154,7 @@ public actor ActionSocket {
                 if let message = try await webSocketTask?.receive() {
                     handleMessage(message)
                 } else {
-                    throw SocketError.webSocketTaskUnavailable
+                    throw Error.webSocketTaskUnavailable
                 }
             } catch {
                 handleDisconnect()
@@ -186,7 +187,7 @@ public actor ActionSocket {
     
     
     func subscribe() async throws {
-        guard let task = webSocketTask, isConnected else { throw SocketError.webSocketDisconnected }
+        guard let task = webSocketTask, isConnected else { throw Error.webSocketDisconnected }
         
         let identifier = ["channel": config.channel]
         
@@ -198,7 +199,7 @@ public actor ActionSocket {
         if let payload = payload.actionSocketToJSON {
             try await task.send(.string(payload))
         } else {
-            throw SocketError.webSocketInvalidFormat
+            throw Error.webSocketInvalidFormat
         }
     }
     
@@ -255,20 +256,36 @@ public actor ActionSocket {
     }
     
     
-    public func send(_ data: [String: Any?]) async throws {
-        guard let task = webSocketTask, isConnected else { throw SocketError.webSocketDisconnected }
+    public func send(_ dictionary: [String: Any?]) async throws {
+        guard
+            let task = webSocketTask,
+            isConnected,
+            let jsonString = dictionary.actionSocketToJSON,
+            let identifierString = identifier.actionSocketToJSON
+        else { throw Error.webSocketDisconnected }
         
         let payload: [String: Any?] = [
             "command": "message",
-            "identifier": identifier.actionSocketToJSON!,
-            "data": data.actionSocketToJSON!
+            "identifier": identifierString,
+            "data": jsonString
         ]
         
         if let payload = payload.actionSocketToJSON {
             try await task.send(.string(payload))
         } else {
-            throw SocketError.webSocketInvalidFormat
+            throw Error.webSocketInvalidFormat
         }
+    }
+    
+    
+    public func send(data: Data) async throws {
+        let json = try JSONSerialization.jsonObject(with: data, options: [])
+        
+        guard let dictionary = json as? [String: Any?] else {
+            throw Error.dataParse
+        }
+        
+        try await send(dictionary)
     }
 }
 
